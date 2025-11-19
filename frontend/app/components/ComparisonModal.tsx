@@ -13,11 +13,9 @@ type ComparisonModalProps = {
   totalDetailPages: number;
   pagedDetails: SaleComparisonDetail[];
   formattedComparisonDate: string;
+  comparisonType: number;
   onClose: () => void;
-  onBranchSelect: (branch: string | null) => void;
   onPageChange: (page: number) => void;
-  allBranches: string[];
-  selectedRowItems?: Array<{ branchName: string }>;
 };
 
 export default function ComparisonModal({
@@ -29,11 +27,9 @@ export default function ComparisonModal({
   totalDetailPages,
   pagedDetails,
   formattedComparisonDate,
+  comparisonType,
   onClose,
-  onBranchSelect,
   onPageChange,
-  allBranches,
-  selectedRowItems,
 }: ComparisonModalProps) {
   const historyTotal = useMemo(() => {
     if (!selectedBranchForDetail || allDetailItems.length === 0) {
@@ -81,11 +77,18 @@ export default function ComparisonModal({
   }, [
     selectedBranchForDetail,
     allDetailItems.length,
-    detailItems.length,
     historyTotal,
     applicationTotal,
     selectedRow,
   ]);
+
+  // Industries үед "Бүх салбар" үед эхний салбарын нэрийг авна
+  const firstBranchName = useMemo(() => {
+    if (comparisonType === 1 && !selectedBranchForDetail && allDetailItems.length > 0) {
+      return allDetailItems[0]?.branchName || "Бүх салбар";
+    }
+    return null;
+  }, [comparisonType, selectedBranchForDetail, allDetailItems]);
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/70 p-4 backdrop-blur">
@@ -93,29 +96,26 @@ export default function ComparisonModal({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              Төлбөрийн төрөл
+              {comparisonType === 0 ? "Төлбөрийн төрөл" : "Industries"}
             </p>
             <h2 className="text-2xl font-semibold">
-              {selectedRow.paymentName || `Type ${selectedRow.paymentType}`}
+              {comparisonType === 0
+                ? selectedRow.paymentName || `Type ${selectedRow.paymentType}`
+                : selectedBranchForDetail || firstBranchName || "Бүх салбар"}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {selectedBranchForDetail || "Бүх салбар"} ·{" "}
-              {detailItems.length.toLocaleString("mn-MN")} гүйлгээ
+              {comparisonType === 0
+                ? selectedBranchForDetail || "Бүх салбар"
+                : !selectedBranchForDetail
+                  ? selectedRow.paymentName || `Type ${selectedRow.paymentType}`
+                  : selectedBranchForDetail}{" "}
+              · {detailItems.length.toLocaleString("mn-MN")} гүйлгээ
             </p>
           </div>
-          <div className="flex flex-col items-end gap-3 sm:flex-row sm:items-center">
-            <div className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-700 dark:text-gray-300">
-              <p className="text-sm font-semibold text-gray-700 dark:text-white">
-                {formattedComparisonDate}
-              </p>
-            </div>
-            <button
-              type="button"
-              className="rounded-full border border-gray-300 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 transition hover:border-gray-600 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300"
-              onClick={onClose}
-            >
-              Close
-            </button>
+          <div className="px-4 py-2 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-gray-700 dark:text-gray-300">
+            <p className="text-sm font-semibold text-gray-700 dark:text-white">
+              {formattedComparisonDate}
+            </p>
           </div>
         </div>
 
@@ -243,6 +243,16 @@ export default function ComparisonModal({
               Нэмэлт задрал байхгүй.
             </p>
           )}
+        </div>
+
+        <div className="mt-6 flex justify-end border-t border-gray-200 pt-4 dark:border-gray-800">
+          <button
+            type="button"
+            className="rounded-md border border-gray-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-600 transition hover:border-black hover:text-black dark:border-gray-700 dark:text-gray-300"
+            onClick={onClose}
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>

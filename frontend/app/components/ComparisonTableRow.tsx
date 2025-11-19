@@ -10,6 +10,7 @@ type ComparisonTableRowProps = {
   comparisonType: number;
   onSelect: (row: SaleComparisonItem) => void;
   selectedBranch?: string | null;
+  branchNameOverride?: string | null;
 };
 
 export default function ComparisonTableRow({
@@ -18,8 +19,34 @@ export default function ComparisonTableRow({
   comparisonType,
   onSelect,
   selectedBranch,
+  branchNameOverride,
 }: ComparisonTableRowProps) {
-  const displayValue = item.paymentName || String(item.paymentType);
+  // Industries үед салбарын нэрийг, Payment type үед payment type-ийн нэрийг харуулна
+  const displayValue = useMemo(() => {
+    if (comparisonType === 1) {
+      if (branchNameOverride) {
+        const trimmed = branchNameOverride.trim();
+        if (trimmed) {
+          return trimmed;
+        }
+      }
+      const firstBranch = item.items?.[0]?.branchName;
+      return firstBranch || "Бүх салбар";
+    }
+    return item.paymentName || String(item.paymentType);
+  }, [
+    comparisonType,
+    item.paymentName,
+    item.paymentType,
+    item.items,
+    branchNameOverride,
+  ]);
+
+  // Payment type-ийн нэрийг харуулах
+  const paymentTypeDisplay = useMemo(() => {
+    return item.paymentName || String(item.paymentType);
+  }, [item.paymentName, item.paymentType]);
+
   const totalDetails = item.items?.length ?? 0;
 
   const branchDetails = useMemo(() => {
@@ -97,7 +124,9 @@ export default function ComparisonTableRow({
       <span className="font-medium text-gray-900 dark:text-white">
         {displayValue}
       </span>
-      <span className="text-gray-500 dark:text-gray-300"></span>
+      <span className="text-gray-500 dark:text-gray-300">
+        {comparisonType === 1 ? paymentTypeDisplay : ""}
+      </span>
       <span className="text-right font-mono">
         {formatMoney(historyTotal)}
       </span>

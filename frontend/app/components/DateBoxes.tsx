@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type DateBoxesProps = {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string;
 };
 
 function getTodayISO() {
@@ -44,9 +45,15 @@ export default function DateBoxes({
   value,
   onChange,
   disabled = false,
+  className = "",
 }: DateBoxesProps) {
   const currentValue = value || getTodayISO();
   const summary = safeParts(currentValue);
+  const [yearInput, setYearInput] = useState(summary.year);
+
+  useEffect(() => {
+    setYearInput(summary.year);
+  }, [summary.year]);
 
   const days = useMemo(() => {
     const totalDays = new Date(
@@ -73,7 +80,7 @@ export default function DateBoxes({
     <div
       className={`mt-4 flex flex-wrap items-end gap-4 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm dark:border-gray-800 dark:bg-zinc-900 dark:text-white ${
         disabled ? "opacity-60" : ""
-      }`}
+      } ${className}`}
     >
       <div className="flex flex-col">
         <label className="text-[10px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -81,12 +88,18 @@ export default function DateBoxes({
         </label>
         <input
           type="number"
-          value={summary.year}
+          value={yearInput}
           disabled={disabled}
           onChange={(event) => {
             const clean = event.target.value.replace(/[^\d]/g, "").slice(0, 4);
+            setYearInput(clean);
             if (clean.length === 4) {
               updateDate({ year: clean });
+            }
+          }}
+          onBlur={() => {
+            if (yearInput.length !== 4) {
+              setYearInput(summary.year);
             }
           }}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 disabled:cursor-not-allowed dark:border-gray-700 dark:bg-zinc-900 dark:text-white"
