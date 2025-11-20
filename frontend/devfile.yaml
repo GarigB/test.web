@@ -1,0 +1,43 @@
+schemaVersion: 2.2.0
+metadata:
+  name: frontend
+  displayName: Frontend Application
+  description: Next.js frontend application
+  projectType: nodejs
+  language: typescript
+components:
+  - name: runtime
+    container:
+      image: registry.access.redhat.com/ubi8/nodejs-18:latest
+      memoryLimit: 2Gi
+      cpuLimit: 1000m
+      endpoints:
+        - name: http
+          targetPort: 3000
+          protocol: http
+          exposure: public
+commands:
+  - id: install
+    exec:
+      component: runtime
+      commandLine: npm install
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: false
+  - id: build
+    exec:
+      component: runtime
+      commandLine: npm install && npm run build
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: true
+  - id: run
+    exec:
+      component: runtime
+      commandLine: npm start
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: run
+        isDefault: true
