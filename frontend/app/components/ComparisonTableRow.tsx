@@ -21,7 +21,6 @@ export default function ComparisonTableRow({
   selectedBranch,
   branchNameOverride,
 }: ComparisonTableRowProps) {
-  // Industries үед салбарын нэрийг, Payment type үед payment type-ийн нэрийг харуулна
   const displayValue = useMemo(() => {
     if (comparisonType === 1) {
       if (branchNameOverride) {
@@ -41,11 +40,6 @@ export default function ComparisonTableRow({
     item.items,
     branchNameOverride,
   ]);
-
-  // Payment type-ийн нэрийг харуулах
-  const paymentTypeDisplay = useMemo(() => {
-    return item.paymentName || String(item.paymentType);
-  }, [item.paymentName, item.paymentType]);
 
   const totalDetails = item.items?.length ?? 0;
 
@@ -109,7 +103,6 @@ export default function ComparisonTableRow({
 
   return (
     <div
-      key={`${item.paymentType}-${item.branchId || index}-${index}`}
       onClick={() => onSelect(item)}
       role="button"
       tabIndex={0}
@@ -125,7 +118,7 @@ export default function ComparisonTableRow({
         {displayValue}
       </span>
       <span className="text-gray-500 dark:text-gray-300">
-        {comparisonType === 1 ? paymentTypeDisplay : ""}
+        {comparisonType === 1 ? (item.paymentName || String(item.paymentType)) : ""}
       </span>
       <span className="text-right font-mono">
         {formatMoney(historyTotal)}

@@ -12,6 +12,7 @@ export type SaleComparisonDetail = {
 
 export type SaleComparisonItem = {
   branchId: string;
+  branchName?: string;
   paymentType: number;
   paymentName: string | null;
   applicationSaleAmount: number;
